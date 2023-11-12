@@ -25,7 +25,7 @@ def fftwave(u, v, sz = 128):
 	showgrey(Fhat, False)
 	a1.title.set_text("Fhat: (u, v) = (%d, %d)" % (u, v))
 	
-	# What is
+	# What is done by these instructions?
 	if u < sz/2:
 		uc = u
 	else:
