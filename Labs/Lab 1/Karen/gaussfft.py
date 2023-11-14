@@ -16,7 +16,7 @@ def gaussfft(pic, t):
     
     # Fourier transform of the original image and the Gaussian filter.
     Fhat = fft2(pic)
-    Ghat = fft2(gaussian_filter)
+    Ghat = abs(fft2(gaussian_filter))
 
     # Multiply the Fourier transforms.
     FGhat = Fhat * Ghat
