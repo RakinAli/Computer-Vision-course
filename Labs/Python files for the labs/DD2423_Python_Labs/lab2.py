@@ -17,11 +17,11 @@ if 0:
 	print("That was a stupid idea")
         
         
-def deltax():
+def delta_x():
         # ....
         return dxmask
 
-def deltay():
+def delta_y():
         # ....
         return dymask
 
