@@ -152,7 +152,6 @@ def discgaussfft(inpic, sigma2):
 	[h, w] = np.shape(inpic)
 	[x, y] = np.meshgrid(np.linspace(0, 1-1/w, w),np.linspace(0, 1-1/h, h))
 	ffft = np.exp(sigma2 * (np.cos(2*np.pi*x) + np.cos(2*np.pi*y) - 2))
-	print(np.shape(inpic), np.shape(ffft), np.shape(pfft))
 	pixels = np.real(np.fft.ifft2(ffft * pfft))
 	return pixels
 
