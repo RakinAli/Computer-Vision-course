@@ -214,15 +214,15 @@ def norm_cuts_segm(I, colour_bandwidth, radius, ncuts_thresh, min_area, max_dept
 ############################################
 
 def norm_cuts_example():
-    colour_bandwidth = 20.0  # color bandwidth
+    colour_bandwidth = 10.0  # color bandwidth
     radius = 1               # maximum neighbourhood distance
-    ncuts_thresh = 0.10      # cutting threshold
-    min_area = 200           # minimum area of segment
-    max_depth = 12           # maximum splitting depth
+    ncuts_thresh = 0.50      # cutting threshold
+    min_area = 18            # minimum area of segment
+    max_depth = 30           # maximum splitting depth
     scale_factor = 0.25      # image downscale factor
     image_sigma = 0.5        # image preblurring scale
 
-    img = Image.open('Images-jpg/tiger1.jpg')
+    img = Image.open('C:/Users/karen/git/Computer-Vision-course/Labs/Lab 3/Karen/Images-jpg/tiger1.jpg')
     img = img.resize((int(img.size[0]*scale_factor), int(img.size[1]*scale_factor)))
      
     h = ImageFilter.GaussianBlur(image_sigma)
@@ -237,7 +237,7 @@ def norm_cuts_example():
     plt.imshow(img)
     plt.axis('off')
     plt.show()
-    img.save('result/normcuts1.png')
+    img.save('C:/Users/karen/git/Computer-Vision-course/Labs/Lab 3/Karen/result/tiger1_normcuts1.png')
 
 if __name__ == '__main__':
     sys.exit(norm_cuts_example())
