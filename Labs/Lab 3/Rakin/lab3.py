@@ -39,6 +39,39 @@ def create_centroids(image, K, channels=3):
     return initial_centers
 
 
+# Does not work properly
+def create_centroids_logically(image, K, channels=3):
+    # Get the unique RGB values
+    values = image.reshape(-1, channels)
+    selected_values = set()
+    # Pick one point randomly
+    values_picked = values[np.random.choice(values.shape[0], 1)]
+    # Add the value to the set of selected values
+    selected_values.add(tuple(values_picked[0]))
+    while len(selected_values) < K:
+        # Calculate the distance between each point and the already picked points
+        dist = distance_matrix(values, np.array(list(selected_values)))
+        # Get the maximum distance for each point
+        max_dist = np.max(dist, axis=1)
+        # Sort the indices of max_dist in descending order of distance
+        sorted_indices = np.argsort(max_dist)[::-1]
+
+        # Find the next unique point
+        for idx in sorted_indices:
+            candidate = tuple(values[idx])
+            if candidate not in selected_values:
+                selected_values.add(candidate)
+                break
+
+        # Add a check to handle the situation where all unique points are exhausted
+        if len(selected_values) == len(np.unique(values, axis=0)):
+            print("All unique points have been added.")
+            break
+    initial_centers = np.array(list(selected_values)[:K])
+
+    return initial_centers
+
+
 def kmeans_segm(image, K, L, seed=42):
     """
     Input Args:
@@ -60,12 +93,12 @@ def kmeans_segm(image, K, L, seed=42):
         image_flat = np.reshape(image, (-1, 3))
 
     # If image is already 2D
-    elif dimensions == 2: 
+    elif dimensions == 2:
         height, channels = image.shape
-        image_flat = np.reshape(image, (-1, channels)) 
+        image_flat = np.reshape(image, (-1, channels))
     else:
         raise ValueError("Image must be a 2D or 3D array.")
-    
+
     # K-means algorithm
     centers = create_centroids(image, K)
 
@@ -80,14 +113,12 @@ def kmeans_segm(image, K, L, seed=42):
         # Update cluster centers
         for j in range(K):
             centers[j] = np.mean(image_flat[segmentation == j], axis=0)
-        
+
     # Reshape segmentation to original image dimensions
     if dimensions == 3:
-        segmentation = segmentation.reshape(height, width)   
-       
+        segmentation = segmentation.reshape(height, width)
+
     return segmentation, centers
-
-
 
 
 def mixture_prob(image, K, L, mask):
