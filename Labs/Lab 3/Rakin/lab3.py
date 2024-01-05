@@ -8,42 +8,7 @@ from scipy.stats import multivariate_normal
 from scipy.spatial import distance_matrix
 from scipy.spatial.distance import cdist
 from scipy.spatial import distance
-
-
-def initialize_cluster_centers(image, K, seed):
-    np.random.seed(seed)
-
-    # Check if the image is already flat or if it's 3D
-    if image.ndim == 3:  # If image is 3D
-        h, w, d = image.shape
-        flattened_data = image.reshape(h * w, d)
-    elif image.ndim == 2:  # If image is already 2D
-        flattened_data = image
-        h, w = flattened_data.shape[0], 1  # Treat the image as having a single column
-        d = flattened_data.shape[1]
-    else:
-        raise ValueError("Image must be a 2D or 3D array.")
-
-    # Initialize the list of chosen indices
-    chosen_indices = []
-
-    # Randomly pick the first center
-    first_index = np.random.choice(h * w)
-    chosen_indices.append(first_index)
-
-    # Iteratively pick the most different pixels
-    for _ in range(1, K):
-        remaining_indices = [i for i in range(h * w) if i not in chosen_indices]
-        distances = np.linalg.norm(
-            flattened_data[remaining_indices] - flattened_data[chosen_indices, None, :],
-            axis=2 if image.ndim == 3 else 1,
-        )
-        max_distance_index = remaining_indices[np.argmax(np.min(distances, axis=0))]
-        chosen_indices.append(max_distance_index)
-
-    # Extract the initial centers
-    initial_centers = flattened_data[chosen_indices]
-    return initial_centers
+import random
 
 
 def openImage(path):
@@ -57,6 +22,23 @@ def openImage(path):
     return img
 
 
+def create_centroids(image, K, channels=3):
+    # Get the unique RGB values
+    values = image.reshape(-1, channels)
+    selected_values = set()
+
+    while len(selected_values) < K:
+        values_picked = values[np.random.choice(values.shape[0], K)]
+        # Check if the value is already in the set of selected values
+        for value in values_picked:
+            value = tuple(value)
+            if value not in selected_values:
+                # Add the value to the set of selected values
+                selected_values.add(value)
+    initial_centers = np.array(list(selected_values)[:K])
+    return initial_centers
+
+
 def kmeans_segm(image, K, L, seed=42):
     """
     Input Args:
@@ -68,44 +50,44 @@ def kmeans_segm(image, K, L, seed=42):
         Segmentation - Integer image with cluster indices
         centers - an array with K cluster mean colors
     """
-    # Check if the image is already a 2D array or a 3D array
-    if image.ndim == 3:
-        height, width, dimensions = image.shape
-        image_flat = np.reshape(image, (height * width, dimensions))
-    elif image.ndim == 2:
-        # The image is already flat, use it directly
-        image_flat = image
-        # Since the image is flat, we don't have the original height and width
-        height, width = None, None
+    np.random.seed(seed)
+    random.seed(seed)
+    dimensions = image.ndim
+
+    # Check if the image is already flat or if it's 3D
+    if dimensions == 3:  # If image is 3D
+        height, width, channels = image.shape
+        image_flat = np.reshape(image, (-1, 3))
+
+    # If image is already 2D
+    elif dimensions == 2: 
+        height, channels = image.shape
+        image_flat = np.reshape(image, (-1, channels)) 
     else:
         raise ValueError("Image must be a 2D or 3D array.")
-
+    
     # K-means algorithm
-    # Initialize the cluster centers randomly
-    centers = initialize_cluster_centers(image_flat, K, seed)
+    centers = create_centroids(image, K)
 
     # Iterate L times
     for i in range(L):
-        # Assign each pixel to the cluster center for which the distance is minimum
-        distances = distance.cdist(image_flat, centers)
-        nearest_cluster = np.argmin(distances, axis=1)
+        # Calculate distance matrix
+        dist = distance_matrix(image_flat, centers)
+
+        # Assign each pixel to closest cluster
+        segmentation = np.argmin(dist, axis=1)
 
         # Update cluster centers
         for j in range(K):
-            if np.any(nearest_cluster == j):
-                centers[j, :] = np.mean(image_flat[nearest_cluster == j], axis=0)
-            else:
-                # If a cluster has no pixels, reinitialize its center
-                centers[j] = image_flat[np.random.choice(image_flat.shape[0])]
-
-    if height is not None and width is not None:
-        # Reshape the segmentation back to the original image's shape
-        segmentation = np.reshape(nearest_cluster, (height, width))
-    else:
-        # If the image was originally 2D, keep the segmentation flat
-        segmentation = nearest_cluster
-
+            centers[j] = np.mean(image_flat[segmentation == j], axis=0)
+        
+    # Reshape segmentation to original image dimensions
+    if dimensions == 3:
+        segmentation = segmentation.reshape(height, width)   
+       
     return segmentation, centers
+
+
 
 
 def mixture_prob(image, K, L, mask):
@@ -120,7 +102,7 @@ def mixture_prob(image, K, L, mask):
     mask = np.reshape(mask, (-1))
     masked_Ivec = Ivec[np.reshape(np.nonzero(mask == 1), (-1))]
 
-    """K-means segmentaiton"""
+    """K-means segmentation - HERE IS the error """
     # Get Gaussian components.
     segmentation, centers = kmeans_segm(masked_Ivec, K, L)
 
