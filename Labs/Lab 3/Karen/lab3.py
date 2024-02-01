@@ -79,7 +79,7 @@ def mixture_prob(image, K, L, mask):
     # Initializes weights (weights) based on the proportion of pixels
     weights = np.zeros(K)
     for i in range(K):
-        weights[i] = np.sum(np.nonzero(segmentation == i)) / segmentation.shape[0]
+        weights[i] = np.sum(np.nonzero(segmentation == i)).astype(int) / segmentation.shape[0]
 
     # Iteratre L times to refine the paramters of the Gaussian components
     for i in range(L):
