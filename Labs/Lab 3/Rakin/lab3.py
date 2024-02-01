@@ -38,7 +38,6 @@ def create_centroids(image, K, channels=3):
     initial_centers = np.array(list(selected_values)[:K])
     return initial_centers
 
-
 # Does not work properly
 def create_centroids_logically(image, K, channels=3):
     # Get the unique RGB values
@@ -68,7 +67,6 @@ def create_centroids_logically(image, K, channels=3):
             print("All unique points have been added.")
             break
     initial_centers = np.array(list(selected_values)[:K])
-
     return initial_centers
 
 
