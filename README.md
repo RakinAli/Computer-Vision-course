@@ -1,5 +1,9 @@
 # Computer Vision course
  A course in computer science focusing on basic theory, models, and methods for computer vision, image analysis and image processing.
+ ## Grades received in the labs
+ - Lab 1: A
+ - Lab 2: B
+ - Lab 3: A
 
 ## Intended learning outcomes
 After completing the course with a passing grade the student should be able to:
